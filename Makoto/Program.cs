@@ -137,7 +137,7 @@ namespace Makoto
 
                 // Unknown command
                 if (!result.IsSuccess && result.Error == CommandError.UnknownCommand)
-                    await msg.Channel.SendFileAsync("Unkown command. Use `help` for a list of commands");
+                    await msg.Channel.SendMessageAsync("Unkown command. Use `help` for a list of commands");
                 //Actual problem
                 else if (!result.IsSuccess)
                     await msg.Channel.SendMessageAsync("There was a problem: ```\n" + result.ErrorReason + "```");

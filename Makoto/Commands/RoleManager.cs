@@ -57,6 +57,27 @@ namespace Makoto.Commands
         }
         #endregion
 
+        #region list
+        [Command("list"), Summary("list all notify roles")]
+        public async Task List()
+        {
+            //Test if PM, ignore if it is.
+            if (Context.Guild == null)
+            {
+                await ReplyAsync("Please use this in the server you wish to change your role in");
+                return;
+            }
+            var roles = Context.Guild.Roles.Where(e => e.Name.StartsWith(prefix));
+            string output = "Here's a list of all notify roles: ```\n";
+            foreach (var role in roles)
+            {
+                output += $"{role.Name}\n";
+            }
+            output += "```";
+            await ReplyAsync(output);
+        }
+        #endregion
+
         #region new
         [Command("new"), Summary("Create's a new role. Admin only")]
         [RequireUserPermission(ChannelPermission.ManageRoles)]
