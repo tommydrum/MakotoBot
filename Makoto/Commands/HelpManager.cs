@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Makoto.Commands
 {
-    public class HelpManager : ModuleBase<SocketCommandContext>
+    public class HelpManager : ModuleBase
     {
         private readonly CommandService _service;
         private readonly IConfigurationRoot _config;

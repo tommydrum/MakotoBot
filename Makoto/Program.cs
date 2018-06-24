@@ -29,7 +29,7 @@ namespace Makoto
         public IConfigurationRoot Configuration { get; set; }
         private IServiceProvider _services;
 
-        public static void Main(string[] args)
+        public static void Main()
             => new Program().MainAsync().GetAwaiter().GetResult();
 
         public async Task MainAsync()
@@ -109,9 +109,6 @@ namespace Makoto
 
             // Insert all command modules (searching via command assembly)
             await _commands.AddModulesAsync(Assembly.GetEntryAssembly());
-
-            // Get the helpmanager command module inserted.. because assembly doesn't want to find it..
-            // await _commands.AddModuleAsync<HelpManager>();
 
             // Subscribe a handler to see if a message invokes a command.
             _client.MessageReceived += HandleCommandAsync;
