@@ -12,11 +12,12 @@ using System.Threading.Tasks;
 
 namespace Makoto.Commands
 {
-    public class AdministrationManager : ModuleBase
+    [Name("Administrator Commands")]
+    public class AdministrationModule : ModuleBase
     {
         private readonly CommandService _service;
         private readonly IConfigurationRoot _config;
-        public AdministrationManager(CommandService service, IConfigurationRoot config)
+        public AdministrationModule(CommandService service, IConfigurationRoot config)
         {
             _service = service;
             _config = config;

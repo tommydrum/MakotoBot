@@ -10,13 +10,14 @@ using Microsoft.Extensions.Configuration;
 
 namespace Makoto.Commands
 {
-    public class RoleManager : ModuleBase
+    [Name("Role Commands")]
+    public class RoleModule : ModuleBase
     {
         private readonly IConfigurationRoot _config;
         private string prefix;
 
         //Constructor
-        public RoleManager(IConfigurationRoot config)
+        public RoleModule(IConfigurationRoot config)
         {
             _config = config;
             prefix = _config["discord:prefix"];

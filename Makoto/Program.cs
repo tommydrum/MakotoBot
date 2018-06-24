@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Discord.Net.Providers.WS4Net;
 using Makoto.Commands;
+using Discord.Addons.CommandCache;
 
 
 /*   
@@ -103,6 +104,7 @@ namespace Makoto
                 CaseSensitiveCommands = false
 
             }));
+            _map.AddSingleton(new CommandCacheService(_client));
 
             // Build the service provider.
             _services = _map.BuildServiceProvider();

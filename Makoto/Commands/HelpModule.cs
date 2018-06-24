@@ -9,12 +9,13 @@ using System.Threading.Tasks;
 
 namespace Makoto.Commands
 {
-    public class HelpManager : ModuleBase
+    [Name("Help Commands")]
+    public class HelpModule : ModuleBase
     {
         private readonly CommandService _service;
         private readonly IConfigurationRoot _config;
 
-        public HelpManager(CommandService service, IConfigurationRoot config)
+        public HelpModule(CommandService service, IConfigurationRoot config)
         {
             _service = service;
             _config = config;
