@@ -9,6 +9,14 @@ using System.Threading.Tasks;
 using Discord.Net.Providers.WS4Net;
 using Makoto.Commands;
 
+
+/*   
+ *   This bot requries a JSON file called _configuration.json to be located in the same directory as the executable.
+ *   In that file, define discord:token and discord:prefix.
+ *   token is the bot authentication token.
+ *   prefix is the role prefix that will get prepended to role name when dealing with the RoleManager.
+ */
+
 namespace Makoto
 {
     public class Program
@@ -19,36 +27,36 @@ namespace Makoto
         private readonly IServiceCollection _map = new ServiceCollection();
         private readonly CommandService _commands = new CommandService();
         public IConfigurationRoot Configuration { get; set; }
+        private IServiceProvider _services;
 
         public static void Main(string[] args)
             => new Program().MainAsync().GetAwaiter().GetResult();
 
         public async Task MainAsync()
         {
-            //Configuration file management:
+            // Configuration file management:
             var builder = new ConfigurationBuilder()        // Create a new instance of the config builder
                 .SetBasePath(AppContext.BaseDirectory)      // Specify the default location for the config file
                 .AddJsonFile("_configuration.json");        // Add this (json encoded) file to the configuration
             Configuration = builder.Build();                // Build the configuration
 
+            // Discord Client creation and customization
             _client = new DiscordSocketClient(
                 new DiscordSocketConfig
                 {
                     LogLevel = LogSeverity.Info,
-                    WebSocketProvider = WS4NetProvider.Instance,
                     AlwaysDownloadUsers = true,
                     HandlerTimeout = null,
                 });
 
-            //Give the client my logger
+            // Insert log
             _client.Log += Log;
 
             // Centralize the logic for commands into a seperate method.
             await InitCommands();
 
-            string discordToken = Configuration["tokens:discord"];     // Get the discord token from the config file
-            string token = discordToken; // Remember to keep this private!
-            await _client.LoginAsync(TokenType.Bot, token);
+            // Log in and start the bot's service.
+            await _client.LoginAsync(TokenType.Bot, Configuration["discord:token"]);
             await _client.StartAsync();
 
             // Block this task until the program is closed.
@@ -79,21 +87,13 @@ namespace Makoto
             Console.WriteLine($"{DateTime.Now,-19} [{msg.Severity,8}] {msg.Source}: {msg.Message}");
             Console.ForegroundColor = cc;
 
-            // If you get an error saying 'CompletedTask' doesn't exist,
-            // your project is targeting .NET 4.5.2 or lower. You'll need
-            // to adjust your project's target framework to 4.6 or higher
-            // (instructions for this are easily Googled).
-            // If you *need* to run on .NET 4.5 for compat/other reasons,
-            // the alternative is to 'return Task.Delay(0);' instead.
             return Task.CompletedTask;
         }
 
-        private IServiceProvider _services;
-
         private async Task InitCommands()
         {
-            // Repeat this for all the service classes
-            // and other dependencies that your commands might need.
+
+            // Insert services/dependencies for commands
             _map.AddSingleton(Configuration);
             _map.AddSingleton(_client);
             _map.AddSingleton(new CommandService(new CommandServiceConfig
@@ -104,16 +104,14 @@ namespace Makoto
 
             }));
 
-            // When all your required services are in the collection, build the container.
-            // Tip: There's an overload taking in a 'validateScopes' bool to make sure
-            // you haven't made any mistakes in your dependency graph.
+            // Build the service provider.
             _services = _map.BuildServiceProvider();
 
-            // Either search the program and add all Module classes that can be found.
-            // Module classes *must* be marked 'public' or they will be ignored.
+            // Insert all command modules (searching via command assembly)
             await _commands.AddModulesAsync(Assembly.GetEntryAssembly());
-            // Or add Modules manually if you prefer to be a little more explicit:
-            await _commands.AddModuleAsync<HelpManager>();
+
+            // Get the helpmanager command module inserted.. because assembly doesn't want to find it..
+            // await _commands.AddModuleAsync<HelpManager>();
 
             // Subscribe a handler to see if a message invokes a command.
             _client.MessageReceived += HandleCommandAsync;
@@ -127,10 +125,7 @@ namespace Makoto
 
             // Create a number to track where the prefix ends and the command begins
             int pos = 0;
-            // Replace the '!' with whatever character
-            // you want to prefix your commands with.
-            // Uncomment the second half if you also want
-            // commands to be invoked by mentioning the bot instead.
+            // Searching to see if message is mentioning the bot
             if (msg.HasMentionPrefix(_client.CurrentUser, ref pos))
             {
                 // Create a Command Context.
@@ -140,10 +135,12 @@ namespace Makoto
                 // rather an object stating if the command executed succesfully).
                 var result = await _commands.ExecuteAsync(context, pos, _services);
 
-                // Uncomment the following lines if you want the bot
-                // to send a message if it failed (not advised for most situations).
-                if (!result.IsSuccess && result.Error != CommandError.UnknownCommand)
-                    await msg.Channel.SendMessageAsync(result.ToString());
+                // Unknown command
+                if (!result.IsSuccess && result.Error == CommandError.UnknownCommand)
+                    await msg.Channel.SendFileAsync("Unkown command. Use `help` for a list of commands");
+                //Actual problem
+                else if (!result.IsSuccess)
+                    await msg.Channel.SendMessageAsync("There was a problem: ```\n" + result.ErrorReason + "```");
             }
         }
     }
