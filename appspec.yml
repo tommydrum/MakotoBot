@@ -1,0 +1,22 @@
+version: 0.0
+os: linux
+files:
+  - source: Makoto/build_output
+    destination: /home/ec2-user/Makoto
+  - source: scripts/kestrel-makoto.service
+    destination: /etc/systemd/system/
+hooks:
+  ApplicationStop:
+    - location: scripts/stop_service.sh
+      timeout: 300
+      runas: root
+
+  BeforeInstall:
+    - location: scripts/remove_application.sh
+      timeout: 300
+      runas: root
+
+  ApplicationStart:
+    - location: scripts/start_service.sh
+      timeout: 300
+      runas: root

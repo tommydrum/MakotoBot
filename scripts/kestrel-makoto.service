@@ -1,0 +1,15 @@
+[Unit]
+Description=AWS Makoto Discord Bot
+
+[Service]
+WorkingDirectory=/home/ec2-user/aspnetcoreapp/
+ExecStart=/usr/bin/dotnet /home/ec2-user/Makoto/Makoto.dll
+Restart=always
+# Restart service after 10 seconds if dotnet service crashes
+RestartSec=10
+SyslogIdentifier=Makoto
+User=ec2-user
+Environment=Production 
+
+[Install]
+WantedBy=multi-user.target
