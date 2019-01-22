@@ -2,7 +2,7 @@
 Description=AWS Makoto Discord Bot
 
 [Service]
-WorkingDirectory=/home/ec2-user/aspnetcoreapp/
+WorkingDirectory=/home/ec2-user/Makoto/
 ExecStart=/usr/bin/dotnet /home/ec2-user/Makoto/Makoto.dll
 Restart=always
 # Restart service after 10 seconds if dotnet service crashes
